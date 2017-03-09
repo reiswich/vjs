@@ -2,6 +2,7 @@
  * v.js v1.0.0
  * (c) 2017 Victor Reiswich
  * Released under the MIT License.
+ * https://github.com/reiswich/kjsdoTransport
  */
 ;
 "use strict";
