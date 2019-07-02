@@ -1,1 +1,1 @@
-# vjs
+ vjs  - client-side JavaScript library
