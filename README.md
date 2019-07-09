@@ -1,5 +1,5 @@
 ### VSJ is a fast, lightweight, client-side framework for building powerful JavaScript applications.
-Based on JQuery version >= 1.6+  and Requirejs >= 1.0.0+
+Based on jQuery version >= 1.6+  and Requirejs >= 1.0.0+
 
 
 #### Integrate into HTML page
