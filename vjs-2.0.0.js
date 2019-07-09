@@ -1,8 +1,8 @@
 /*!
- * v.js v1.0.0
+ * v.js v2.0.0
  * (c) 2017 Victor Reiswich
  * Released under the MIT License.
- * https://github.com/reiswich/kjsdoTransport
+ * https://github.com/reiswich/vjs
  */
 ;
 "use strict";
@@ -19,7 +19,11 @@
 					v.create( selector, content );
 				}
 			} else {
-				return object;
+				if (typeof object[0].run_init == "function"){
+					object[0].run_init(content);
+				}else{
+					return object;
+				}
 			}
 
 		} else {
@@ -31,6 +35,7 @@
 	var v_methoden = {
 		project_config : "",
 		triggers : {},
+		ajaxSetup : false,
 		log : {
 			error : function ( text ) {
 				console.error( text );
@@ -46,17 +51,7 @@
 			style : document.styleSheets[ 0 ],
 			css : {}
 		},
-		info_text : {
-			de : {
-				warn_netz : "Ein Netzwerkfehler ist aufgetreten. Versuchen Sie es erneut...",
-				warn_login : "Falsches anmeldedaten",
-				warn_session_ablauf : "Ihre Sitzung ist abgelaufen, bitte loggen Sie sich erneut ein."
-			}
-		},
-		get_info_text : function ( text, language ) {
-			language = language ? language : "de";
-			return v.info_text[ language ][ text ];
-		},
+
 		get_config_project_name : function () {
 			var domain = v.subdomain;
 			var prifex = "_config.js";
@@ -67,11 +62,8 @@
 		append_dom_funcs : {},
 		project : {
 			i : function ( callback ) {
-				v.isv( callback );
-			},
-			"01ad253b47a2b9dda94708a476eb0129" : true,
-			"4a0b1a1f9e4bd6749883e0ce8b2b7589" : true,
-			"469aa571b62d5a6d29b2af34b256014e" : true
+				callback();
+			}
 		},
 		row_objects : {},
 		v_store : {},
@@ -96,6 +88,83 @@
 		socket : {
 			main : ""
 		},
+		
+	get_files : function(e, file, that, callback, empty_file, validator_option){
+//			$('form').on('submit', function (e) {
+		    e.preventDefault();
+		
+		if (empty_file){
+			callback([{
+            	filename:"",
+            	typ:"",
+            	file:""
+            }]);
+            return;
+		}else{
+					var reader = new FileReader();
+					if (!file.files.length) {
+						alert('no file uploaded');
+						return false;
+					}
+					var name = file.files[0].name;
+					var file_size = file.files[0].size;
+					var typ = name.split('.').pop();
+					validator_option.typ = typ;
+					validator_option.file_size = file_size;
+					l.checkFileType.call(this, validator_option, function(is_valis){
+						if (is_valis){
+							reader.onload = function () {
+								var data = reader.result
+								var base64 = data.replace(/^[^,]*,/, '');
+								
+								callback([{
+									filename:name,
+									typ:typ,
+									file:base64
+								}]);
+							};
+							reader.readAsDataURL(file.files[0]);
+		}
+	});
+				
+		}
+	},
+		
+	 checkFileType : function(options, callback) {
+	        var defaults = {
+	            allowedExtensions: ["*"], // alle files
+	            success: function() {},
+	            error: function() {},
+	            max_size: 20971520 // 20 Mb
+	        };
+	        options = $.extend(defaults, options);
+
+//	        return this.each(function() {
+//	            $(this).on('change', function() {
+	        
+//	                var value = $(this).val(),
+//	                    file = value.toLowerCase(),
+                    var extension = options.type;//file.substring(file.lastIndexOf('.') + 1);
+	                var file_size = options.file_size;
+	                
+	                
+	                if (file_size > options.max_size){
+	                	l.alert("warning", "Upload nicht möglich: Maximale Dateigröße ist 20 MB!");
+	                	callback(false);
+	                	return;
+	                }
+	                if (options.allowedExtensions.indexOf("*") !== -1 || options.allowedExtensions.indexOf(options.typ) === -1) {
+	                   // options.error();
+	                	l.alert("warning", 'Upload nicht möglich: Es sind nur Dateien vom Typ " ' +  options.allowedExtensions.join(", ") + ' " erlaubt!');
+	                	callback(false);
+//	                    $(this).focus();
+	                } else {
+	                	callback(true);
+//	                    options.success();
+	                }
+//	            });
+//	        });
+	    },
 
 		empty : function ( name ) {
 			var obj = v.objects[ this.type ][ 0 ];
@@ -116,8 +185,9 @@
 			}
 		},
 
-		event : function ( event_name, data ) {
+		event : function ( event_name, data, clbk ) {
 			var objects = v.objects;
+			var is_event_exist = false;
 			var objects_i, objects_i_0;
 			for ( var i in objects ) {
 				objects_i = objects[ i ];
@@ -126,13 +196,18 @@
 					if ( typeof objects_i_0.event === "object" ) {
 						if ( objects_i_0.event.params ) {
 							if ( typeof objects_i_0.event.params === "string" && objects_i_0.event.params === event_name || ( $.isArray( objects_i_0.event.params ) && objects_i_0.event.params.indexOf( event_name ) !== -1 ) ) {
-								objects_i_0.event.callback.call( objects_i_0, event_name, data );
+								is_event_exist = true;
+								objects_i_0.event.callback.call( objects_i_0, event_name, data, clbk );
 							}
 						} else {
-							objects_i_0.event.callback.call( objects_i_0, event_name, data );
+							objects_i_0.event.callback.call( objects_i_0, event_name, data, clbk );
 						}
 					}
 				}
+			}
+			if ( !is_event_exist ) {
+				// keine events gefunden
+				clbk && clbk( data, true );
 			}
 		},
 
@@ -149,6 +224,55 @@
 
 		form_is_edit : function ( obj, callback ) {
 
+		},
+
+		/* Password strength indicator */
+		passwordStrength : function ( password ) {
+
+			var desc = [
+					{
+						'width' : '0px'
+					}, {
+						'width' : '20%'
+					}, {
+						'width' : '40%'
+					}, {
+						'width' : '60%'
+					}, {
+						'width' : '80%'
+					}, {
+						'width' : '100%'
+					}
+			];
+
+			var descClass = [
+					'', 'progress-bar-danger', 'progress-bar-danger', 'progress-bar-warning', 'progress-bar-success', 'progress-bar-success'
+			];
+
+			var score = 0;
+
+			// if password bigger than 6 give 1 point
+			if ( password.length > 6 )
+				score++;
+
+			// if password has both lower and uppercase characters give 1 point
+			if ( ( password.match( /[a-z]/ ) ) && ( password.match( /[A-Z]/ ) ) )
+				score++;
+
+			// if password has at least one number give 1 point
+			if ( password.match( /d+/ ) )
+				score++;
+
+			// if password has at least one special caracther give 1 point
+			if ( password.match( /.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/ ) )
+				score++;
+
+			// if password bigger than 12 give another 1 point
+			if ( password.length > 10 )
+				score++;
+
+			// display indicator
+			$( "#jak_pstrength" ).removeClass( descClass[ score - 1 ] ).addClass( descClass[ score ] ).css( desc[ score ] );
 		},
 
 		data_is_edit : function ( arr_inputs, obj, callback, callback_with_empty_dic ) {
@@ -198,7 +322,15 @@
 						$el.val( val );
 						$el.change();
 					}
-					$el.val( val );
+					else{
+						var kendo_list = $( $el ).data("kendoDropDownList") || $( $el ).data("kendoComboBox");
+						if (kendo_list){
+							kendo_list.text(val);
+						}
+					}
+					if(val){
+						$el.val( val );
+					}
 				}
 			};
 
@@ -214,6 +346,20 @@
 					set_val.call( this, $el, ( typeof dic[ id ] !== "undefined" ) ? dic[ id ] : ( typeof dic[ name ] !== "undefined" ) ? dic[ name ] : "" );
 				}
 			}
+		},
+		
+		set_farbe_validator: function(inputs){
+			var that = this;
+			var is_valid = true;
+			inputs.each(function(index, element){
+				if ($(this).prop('required') && !$(this).val()){
+					$(this).parent("div").addClass("has-error has-danger");
+					is_valid = false;
+				}else{
+					$(this).parent("div").removeClass("has-error has-danger");
+				}
+			});
+			return is_valid;
 		},
 
 		get_value : function ( inputs, dic, callback ) {
@@ -428,22 +574,46 @@
 			}
 			return cookies;
 		},
+		
+		
+		pasoe_ajax: function(dic, callback){
+			dic.xhrFields = {
+				withCredentials:true
+			};
+			var func_success = dic.success;
+			 dic.contentType =  'application/json; charset=utf-8';
+			dic.url = l.session.serviceURI + dic.url;
+			dic.success = function(result){
+				if (typeof result == "string" && !$.isPlainObject(result)){
+					var $result = $(result);
+					if ($result && $("input[name='j_username']", $result).length){
+						// Unauthorised
+						l.session.login_js.open();
+						return;
+					}
+				}
+				func_success(result);
+			};
+			l.ajax(dic);
+		},
 
 		ajax : function ( dic, callback ) {
-			v.set_dic_md5( dic.data, function () {
-				$.ajax( {
-					async : dic.async || false,
-					cache : dic.cache || false,
-					type : dic.type || 'POST',
-					"url" : dic.url,
-					data : dic.data || "",
-					success : function ( result ) {
-						v.new_action_tksid( result );
-						var res = result.result_db ? result.result_db : result;
-						dic.success ? dic.success( res ) : callback( res );
-					}
-				} );
-			} );
+			// v.set_dic_md5( dic.data, function () {
+			var extend_dic = $.extend( {
+				async : false,
+				cache : false,
+				// contentType: "application/json",
+				// "url" : dic.url,
+				type : "POST",
+				data : "",   // JSON.stringify(data)
+				success : function ( result ) {
+					// v.new_action_tksid( result );
+					// var res = result.result_db ? result.result_db : result;
+					callback && callback( result );
+					// dic.success ? dic.success( result ) : callback( result );
+				}
+			}, dic );
+			$.ajax( extend_dic );
 		},
 
 		define : function ( proj_name, property ) {
@@ -498,7 +668,7 @@
 						init.call( object, object );
 					}
 				}
-
+				v.set_in_objects( object.type, object );
 				if ( typeof object.init == "function" ) {
 					object.init.call( object, settings );
 				}
@@ -509,7 +679,7 @@
 						settings.callback.call( object, object );
 					}
 				}
-				v.set_in_objects( object.type, object );
+				// v.set_in_objects( object.type, object );
 				if ( typeof object.run_hashchange === "object" ) {
 					v.__run_auto_hashchange.call( object, object.run_hashchange );
 				}
@@ -583,7 +753,12 @@
 					}
 					return found_arr;
 				} else {
-					return false;
+					if ( obj[ 0 ][ 0 ].parents( "html" ).length ) {
+						return obj[ 0 ];
+					} else {
+						delete v.objects[ object ];
+						return false;
+					}
 				}
 			} else {
 				return false;
@@ -639,13 +814,13 @@
 					}
 				} else {
 					v.run_onjects_settings( object, settings );
-
-					return;
-
-					if ( settings && typeof settings.callback == "function" ) {
-						settings.callback( [] );
-					}
-					console.log( " ERROR   ---> Script " + load_js_name + "wurde früher geladen !!!!!!!!" );
+//
+//					return;
+//
+//					if ( settings && typeof settings.callback == "function" ) {
+//						settings.callback( [] );
+//					}
+//					console.log( " ERROR   ---> Script " + load_js_name + "wurde früher geladen !!!!!!!!" );
 
 				}
 			} );
@@ -721,7 +896,7 @@
 			div.removeClass().addClass( typ ).text( text ).slideDown( "fast" );
 			setTimeout( function () {
 				div.slideUp( "slow" );
-			}, 3000 );
+			}, 6000 );
 		},
 
 		run_popup : function ( holder, callback ) {
@@ -736,12 +911,6 @@
 				if ( typeof callback === "function" ) {
 					callback();
 				}
-			} );
-		},
-
-		isv : function ( callback ) {
-			v.load_md5( function () {
-				v.project[ CryptoJS.HmacMD5( v.project.name, "SDj!" ).toString() ] ? callback() : "";
 			} );
 		},
 
@@ -773,9 +942,10 @@
 			if ( request.status == 401 || request.responseText === "Unauthorized" ) {
 				v.session_expired( request );
 			} else {
-				v.alert( "warning", "Es ist ein Netzwerkfehler aufgetreten." );
+				if ( request.status !== 0 ) {
+					v.alert( "warning", "Es ist ein Netzwerkfehler aufgetreten." );
+				}
 			}
-
 		},
 
 		add_events_global_obj : function ( type, callback ) {
@@ -888,9 +1058,6 @@
 
 		haupt_hashchange : function ( e ) {
 			v.params = v.url.get_params_url();
-			// if (hashchange_arl.length === 0){
-			// hashchange_arr = v.url.hashchange_one_params;
-			// }
 			// Clear undefined Object
 			var hashchange_one_params = $.grep( v.url.hashchange_one_params, function ( n, i ) {
 				return !!n.this_obj[ 0 ].parents( "html" ).length;
@@ -925,20 +1092,13 @@
 				for ( key in new_params ) {
 					// wenn Params in der url wurde geÃ¤ndert
 					if ( old_params[ key ] !== new_params[ key ] ) {
-						// key_in_params = params.indexOf(key);
-						// wenn es in der Params gibt
-						// if (key_in_params !== -1) {
-						// wenn params wurde gehÃ¤ndert oder erscheint
 						changed_dic[ key ] = true;
 						changed = true;
-						// }
 					}
 				}
-				// wenn params wurde gelÃ¶scht
+				// wenn params wurde geloescht
 				for ( key in old_params ) {
 					if ( !new_params[ key ] ) {
-						// key_in_params = params.indexOf(key);
-						// if (key_in_params !== -1) {
 						changed_dic[ key ] = false;
 						changed = true;
 						// }
@@ -971,9 +1131,6 @@
 			var that = this;
 			var url_params = v.url.get_params_url( location.hash );
 			var arr_run_hashchange = [];
-			// if (hashchange_arl.length === 0){
-			// hashchange_arr = v.url.hashchange_one_params;
-			// }
 			// Clear undefined Object
 			// Run Hashchange Ohne Params !!!
 			if ( Array.isArray( hashchange_arr ) ) {
@@ -983,29 +1140,14 @@
 						v.url.hashchange_one_params = v.url.hashchange_one_params.concat( hashchange_arr[ i ] );
 						hashchange_arr[ i ].callback.call( hashchange_arr[ i ].this_obj );
 					}
-					// else{
-					// // Mit params
-					// arr_run_hashchange.push(hashchange_arr[i] );
-					// }
-					// hashchange_one_params[i].params
 				}
 			} else {
 				if ( !hashchange_arr.params ) {
 					v.url.hashchange_one_params.push( hashchange_arr[ "this_obj" ] = that );
 					hashchange_arr.callback.call( hashchange_arr.this_obj );
 				}
-
-				// TODO !!!!
-
-				// -->>>> v.url.hashchange_one_params.push( {
-				// callback : dic,
-				// this_obj : this
-				// } );
-
 			}
-
 			// var params = hashchange_arr[0].params;
-
 			if ( jQuery.isEmptyObject( v.url.get_params_url( location.hash ) ) ) {
 				if ( Array.isArray( hashchange_arr ) ) {
 					for ( var i in hashchange_arr ) {
@@ -1018,7 +1160,7 @@
 
 			} else {
 
-				// Mit Params  ADD ONLY!!!
+				// Mit Params ADD ONLY!!!
 				if ( Array.isArray( hashchange_arr ) ) {
 					for ( var i in hashchange_arr ) {
 						for ( var key in url_params ) {
@@ -1031,8 +1173,8 @@
 					}
 
 				} else {
-					
-					// Add and RUN !! 
+
+					// Add and RUN !!
 					for ( var i in hashchange_arr.params ) {
 						if ( hashchange_arr.params[ i ] in url_params ) {
 							hashchange_arr[ "this_obj" ] = that;
@@ -1051,9 +1193,9 @@
 			}
 
 		},
-		
-		set_new_name: function(name){
-			window[name] = v;
+
+		set_new_name : function ( name ) {
+			window[ name ] = v;
 		}
 	};
 
@@ -1062,6 +1204,10 @@
 
 	$( document ).ready( function () {
 		$.extend( v, v_methoden );
+		// Default False
+		$.ajaxSetup( {
+			cache : v.ajaxSetup
+		} );
 
 		// // Initialisierung Hashchange.
 		if ( !( 'onhashchange' in window ) ) {
@@ -1088,7 +1234,7 @@
 		v.add_v_store( $( "html" ) );
 		v.add_v_store( $( "body" ) );
 		$( document ).ajaxError( function ( event, request, settings ) {
-			alert( 1 )
+			console.error( "ajaxError" );
 			v.session_is_expired( request );
 		} );
 	} );
