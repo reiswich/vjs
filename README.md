@@ -1,4 +1,4 @@
-### VSJ is a fast, lightweight, client-side framework for building powerful JavaScript applications.
+### VSJ - is a fast, lightweight, client-side framework for building powerful JavaScript applications.
 Based on jQuery version >= 1.6+  and Requirejs >= 1.0.0+
 
 
@@ -13,3 +13,49 @@ Based on jQuery version >= 1.6+  and Requirejs >= 1.0.0+
 <script src="vjs-2.0.0.js"></script>
 ```
 
+
+### Example
+### Define object in JavaScript
+
+```javascript
+// file - vjs.examples.menu.main.js
+
+v.define("vjs.examples.menu.main", {
+	parent : "{.menu_main_holder}",
+	
+	init: function(optionen){
+		// initialization
+	},
+	set_active: function(){
+		// logik ...			
+	},
+	
+	click_event: function(e, that){
+		// logik ...
+	},
+	
+	add_event_click: function(){
+		// logik ...
+	}
+});
+
+// File - vjs.examples.menu.link1.js  inherits file - vjs.examples.menu.main.js
+v.define("vjs.examples.menu.link1", {
+	parent : "{{vjs.examples.menu.main}}",
+	
+	init: function(optionen){
+		// initialization
+	},
+	set_active: function(){
+		// logik ...			
+	},
+	add_event_click: function(){
+	// logik ...
+	},
+	menu_id: "link_1",
+	init: function(optionen){
+		// initialization
+		// logik ...
+	}
+});
+```
