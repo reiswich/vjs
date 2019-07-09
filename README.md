@@ -17,6 +17,8 @@ Based on jQuery version >= 1.6+  and Requirejs >= 1.0.0+
 ### Example
 ### Define object in JavaScript
 
+![directory structure](https://github.com/reiswich/vjs/blob/master/directory_structure.jpg)
+
 ```javascript
 // file - vjs.examples.menu.main.js
 
