@@ -47,6 +47,7 @@ v.define("vjs.examples.menu.link1", {
 	
 	init: function(optionen){
 		// initialization
+		this.add_event_click();
 	},
 	set_active: function(){
 		// logik ...			
