@@ -57,23 +57,5 @@ v.define("vjs.examples.menu.link2", {
 			}, function(data){
 				that.set_grid(data.dsCustomer.ttCustomer, row_content) // .slice(0,1000)
 		 });
-	},
-	
-	
-	
-//	init: function(optionen){
-//		var that = this
-//		
-//		debugger;
-//		that.add_event_click();
-//	}
-
-	
-	
-	
-	
-	
-	
-	
-	
+	}	
 });
