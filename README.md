@@ -61,3 +61,28 @@ v.define("vjs.examples.menu.link1", {
 	menu_id: "link_1"
 });
 ```
+### Examples
+
+#### Parent
+```javascript
+
+// As the parent, the file will be inherited - path.to.file.js
+ v.define("path.to.file", {
+	parent : "{{path.to.file}}",
+
+// A DOM object will be created (div, input, span ...)
+v.define( "path.to.file", {
+	parent : "div",	
+
+// Any DOM object in the HTML page (class .container-fluid)
+// As the parent will be taken the tag "container-fluid" from the DOM (Document Object Model)
+v.define( "path.to.file", {
+	parent : "{.container-fluid}",	 // This is equivalent to $(.container-fluid)
+
+// The file will be loaded as the parent, and the .container-liquid object will be inserted into the DOM.
+// Parent is ".container-fluid" in the DOM object
+v.define( "path", {
+	parent : "path.to.html.html",
+	add_html_in : ".container-fluid",
+
+```
