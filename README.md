@@ -54,10 +54,6 @@ v.define("vjs.examples.menu.link1", {
 	add_event_click: function(){
 	// logik ...
 	},
-	menu_id: "link_1",
-	init: function(optionen){
-		// initialization
-		// logik ...
-	}
+	menu_id: "link_1"
 });
 ```
