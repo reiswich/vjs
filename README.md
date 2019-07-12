@@ -145,6 +145,24 @@ v.url.add_hashchange( {id:"55555",menu:"menu2"})
 v.url.del_hashchange(["menu",id])
 ```
 
+### Add Event hashchange in VJS Object
+```javascript
+ v.define("path.to.js",{
+	parent "....",
+
+	// With parameter. Only responds to the hash "content" or "id"
+	// If the hash changes, the callback will be called.
+	run_hashchange : [{
+		params : ["content", "id"],
+		callback : function ( params, url_arg ) { ... }, // Mit Params
+	}];
+ 
+	// Without parameter. If the hash changes, the callback will always be called.
+	run_hashchange : [{
+		callback : function ( params, url_arg ) { ... }, // Ohne Params
+	}]
+});
+```
 
 
 
