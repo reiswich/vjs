@@ -32,15 +32,15 @@ v.define("vjs.examples.menu.main", {
 		// initialization
 	},
 	set_active: function(){
-		// logik ...			
+		// logic ...			
 	},
 	
 	click_event: function(e, that){
-		// logik ...
+		// logic ...
 	},
 	
 	add_event_click: function(){
-		// logik ...
+		// logic ...
 	}
 });
 
@@ -53,7 +53,7 @@ v.define("vjs.examples.menu.link1", {
 		this.add_event_click();
 	},
 	set_active: function(){
-		// logik ...			
+		// logic ...			
 	},
 	add_event_click: function(){
 	// logik ...
@@ -84,5 +84,38 @@ v.define( "path.to.file", {
 v.define( "path", {
 	parent : "path.to.html.html",
 	add_html_in : ".container-fluid",
+
+```
+#### Events
+
+## Add Event
+```javascript
+v.define("project.path.file", { 
+  parent: "path.to.id",
+  
+  event:{
+  	params:"event_name", or ["event_name","event_name_2","event_name_3"], // String or Array
+ 	callback: function(event_name, data, callback){
+  			if ("event_name_2" == event_name){....}
+			if ("event_name_3" == event_name){....}
+  	}
+  },
+
+// Or without parameters. Will always be called
+event:{
+ 	 callback: function(event_name, data, callback){
+  		// ..... Logic
+	 } 
+}
+});
+```
+## Run Event
+```javascript
+ v.event("event_name", { text:"Hallo World" }); 
+
+// With Callback
+ v.event("event_name", { text:"Hallo World" }, function(data){
+ 	...
+ });
 
 ```
