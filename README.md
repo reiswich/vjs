@@ -86,9 +86,9 @@ v.define( "path", {
 	add_html_in : ".container-fluid",
 
 ```
-#### Events
+### Events
 
-## Add Event
+#### Add Event
 ```javascript
 v.define("project.path.file", { 
   parent: "path.to.id",
@@ -109,7 +109,7 @@ event:{
 }
 });
 ```
-## Run Event
+#### Run Event
 ```javascript
  v.event("event_name", { text:"Hallo World" }); 
 
@@ -121,7 +121,7 @@ event:{
 
 ### Hashchange event
 
-## Set new hash in URL
+#### Set new hash in URL
 ```javascript
 // Replace all URL parameters with new ones.
 // before "#" after "#test=1&test2"
@@ -130,7 +130,7 @@ v.url.hashchange("test=1&test2")  // Equal to -> http://danevi.de/vjs/examples/s
 // before "#test=1&test2" after "#menu=test1&content=2"
 v.url.hashchange( {menu:"test1",content:2}) // Equal to -> http://danevi.de/vjs/examples/start.html#menu=test1&content=2
 ```
-## Add or Rename hashchange (v.url.add_hashchange)
+#### Add or Rename hashchange (v.url.add_hashchange)
 ```javascript
 // Add hashchange -  before #menu=test1&content=2 after #menu=test1&content=2&id=12345
 v.url.add_hashchange( {id:"12345"})
@@ -138,7 +138,7 @@ v.url.add_hashchange( {id:"12345"})
 // Rename hashchange before #menu=test1&content=2&id=12345 after #menu=menu2&content=2&id=55555
 v.url.add_hashchange( {id:"55555",menu:"menu2"})
 ```
-## Remove hashchange
+#### Remove hashchange
 ```javascript
 // Remove parameters "menu" and "id" from URL
 // Remove hashchange - before #menu=menu2&content=2&id=55555 after #content=2
